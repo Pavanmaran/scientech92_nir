@@ -429,6 +429,7 @@ class _MQTTViewState extends State<MQTTView> {
       });
     }
   }
+
   Widget _buildColumn() {
     return Column(
       children: <Widget>[
@@ -445,15 +446,15 @@ class _MQTTViewState extends State<MQTTView> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: <Widget>[
-          _buildTextFieldWith(_hostTextController, 'Enter broker address',
-              currentAppState.getAppConnectionState),
-          const SizedBox(height: 10),
-          _buildTextFieldWith(
-              _topicTextController,
-              'Enter a topic to subscribe or listen',
-              currentAppState.getAppConnectionState),
-          const SizedBox(height: 10),
-          _buildPublishMessageRow(),
+          // _buildTextFieldWith(_hostTextController, 'Enter broker address',
+          //     currentAppState.getAppConnectionState),
+          // const SizedBox(height: 10),
+          // _buildTextFieldWith(
+          //     _topicTextController,
+          //     'Enter a topic to subscribe or listen',
+          //     currentAppState.getAppConnectionState),
+          // const SizedBox(height: 10),
+         // _buildPublishMessageRow(),
           const SizedBox(height: 10),
           _buildConnecteButtonFrom(currentAppState.getAppConnectionState)
         ],
@@ -582,9 +583,9 @@ class _MQTTViewState extends State<MQTTView> {
       osPrefix = 'Flutter_Android';
     }
     manager = MQTTManager(
-        host: _hostTextController.text,
-        topic: _topicTextController.text,
-        identifier: osPrefix,
+        host: "test.mosquitto.org",
+        topic: "tpic",
+        identifier: "NIR",
         state: currentAppState);
     manager.initializeMQTTClient();
     manager.connect();
