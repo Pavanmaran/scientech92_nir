@@ -95,6 +95,7 @@ class _MQTTViewState extends State<MQTTView> {
   var response ;
   bool StartFlag=false;
   Color StartButtonColor = Colors.white24;
+  bool wifisettingFlag = false;
   @override
   void initState() {
     sendcmd("poweron");
@@ -193,12 +194,16 @@ class _MQTTViewState extends State<MQTTView> {
                                         onPressed:(){
                                           if(connected==true){
                                             sendcmd('SSID:'+wifiid.text+';'+'PWD:'+wifipass.text+';;');
-                                            Fluttertoast.showToast(
-                                                msg: "Wifi ID Password Sent",
-                                                toastLength: Toast.LENGTH_SHORT,
-                                                gravity: ToastGravity.CENTER,
-                                                timeInSecForIosWeb: 1
-                                            );
+                                           if(wifisettingFlag){
+                                              Fluttertoast.showToast(
+                                                  msg: "Wifi ID Password Sent",
+                                                  toastLength: Toast.LENGTH_SHORT,
+                                                  gravity: ToastGravity.CENTER,
+                                                  timeInSecForIosWeb: 1
+                                              );
+                                              wifisettingFlag=false;
+                                            }
+
                                           }
                                         },
                                         child: Text("Save")
@@ -267,7 +272,7 @@ class _MQTTViewState extends State<MQTTView> {
                     padding: const EdgeInsets.fromLTRB(0, 9, 0,0),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      child: Text(modelName,style: const TextStyle(
+                      child: Text("NIR Spectroscopy",style: const TextStyle(
                         color: Colors.white,
                         fontSize: 17,
                         //fontWeight: FontWeight.bold
@@ -365,12 +370,26 @@ class _MQTTViewState extends State<MQTTView> {
       throw 'Could not launch $url';
     }
   }
+  Future<bool?> toster(){
+    return Fluttertoast.showToast(
+        msg: "Wifi ID Password Changed",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1
+    );
+  }
   channelconnect(String connectIP){ //function to connect
     try{
       channel = IOWebSocketChannel.connect("ws://192.168.0.1:81"); //channel IP : Port
       channel.stream.listen((message) {
-        //print(message);
+        print(message);
         setState(() {
+          if (message == "IDPASSSAVED") {
+            setState(() {
+              print("ID and Password set");
+              toster();
+            });
+          }
           if (message == "92connected") {
             Modelcode = message.toString().substring(0, 2);
             String NewMessage = message.toString().substring(2, 11);
@@ -381,6 +400,19 @@ class _MQTTViewState extends State<MQTTView> {
                 ConnectionStatus = const Icon(Icons.wifi_off_sharp, color: Colors.white);
                 connected = true; //message is "connected" from NodeMCU
               });
+            }
+            if (NewMessage == "IDPASSSAVED") {
+              setState(() {
+                print("ID and Password set");
+                wifisettingFlag = true;
+                Fluttertoast.showToast(
+                    msg: "Wifi ID Password Sent",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1
+                );
+              });
+
             }
             if(Modelcode=='SB'){
               setState(() {
@@ -443,7 +475,7 @@ class _MQTTViewState extends State<MQTTView> {
 
   Widget _buildEditableColumn() {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(10.0),
       child: Column(
         children: <Widget>[
           // _buildTextFieldWith(_hostTextController, 'Enter broker address',
@@ -455,7 +487,7 @@ class _MQTTViewState extends State<MQTTView> {
           //     currentAppState.getAppConnectionState),
           // const SizedBox(height: 10),
          // _buildPublishMessageRow(),
-          const SizedBox(height: 10),
+          const SizedBox(height: 1),
           _buildConnecteButtonFrom(currentAppState.getAppConnectionState)
         ],
       ),
@@ -512,11 +544,14 @@ class _MQTTViewState extends State<MQTTView> {
   Widget _buildScrollableTextWith(String text) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: Container(
-        width: 400,
-        height: 200,
-        child: SingleChildScrollView(
-          child: Text(text),
+      child: SingleChildScrollView(
+        child: Container(
+          color: Colors.black12,
+          width: 400,
+          height: 450,
+          child: SingleChildScrollView(
+            child: Text(text),
+          ),
         ),
       ),
     );
@@ -583,7 +618,7 @@ class _MQTTViewState extends State<MQTTView> {
       osPrefix = 'Flutter_Android';
     }
     manager = MQTTManager(
-        host: "test.mosquitto.org",
+        host: "test.mosquitto.org",  //broker.mqttdashboard.com
         topic: "tpic",
         identifier: "NIR",
         state: currentAppState);
